@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
 
 interface BookingData {
   id: string
@@ -33,26 +34,56 @@ export default function PaymentOption() {
     setSelectedPayment(method)
   }
 
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
     if (selectedPayment === "direct" && bookingData) {
-      // Save to localStorage
-      const existingBookings = localStorage.getItem("userBookings")
-      const bookings = existingBookings ? JSON.parse(existingBookings) : []
+      try {
+        // Save booked time slots to localStorage for real-time display
+        const bookedSlots = localStorage.getItem("bookedSlots")
+        const booked = bookedSlots ? JSON.parse(bookedSlots) : {}
+        
+        const fieldKey = `field_${bookingData.fieldId}_${bookingData.bookingDate}`
+        booked[fieldKey] = bookingData.timeSlots
+
+        localStorage.setItem("bookedSlots", JSON.stringify(booked))
+
+        // Also try to save to Supabase if table exists
+        try {
+          const supabase = createClient()
+          for (const timeSlot of bookingData.timeSlots) {
+            await supabase.from("bookings").insert({
+              field_id: bookingData.fieldId,
+              booking_date: bookingData.bookingDate,
+              time_slot: timeSlot,
+              total_price: bookingData.totalPrice,
+              status: "confirmed",
+            })
+          }
+        } catch (supabaseError) {
+          console.log("Supabase save skipped (table may not exist)")
+        }
+
+        // Save to localStorage
+        const existingBookings = localStorage.getItem("userBookings")
+        const bookings = existingBookings ? JSON.parse(existingBookings) : []
+        
+        // Add new booking
+        bookings.push({
+          ...bookingData,
+          status: "confirmed",
+          createdAt: new Date().toLocaleString("th-TH"),
+        })
+        
+        localStorage.setItem("userBookings", JSON.stringify(bookings))
+        sessionStorage.removeItem("tempBooking")
       
-      // Add new booking
-      bookings.push({
-        ...bookingData,
-        status: "confirmed",
-        createdAt: new Date().toLocaleString("th-TH"),
-      })
-      
-      localStorage.setItem("userBookings", JSON.stringify(bookings))
-      sessionStorage.removeItem("tempBooking")
-      
-      setShowSuccess(true)
-      setTimeout(() => {
-        router.push("/bookings")
-      }, 3000)
+        setShowSuccess(true)
+        setTimeout(() => {
+          router.push("/bookings")
+        }, 3000)
+      } catch (error) {
+        console.error("Error confirming payment:", error)
+        alert("เกิดข้อผิดพลาดในการบันทึกการจอง")
+      }
     }
   }
 

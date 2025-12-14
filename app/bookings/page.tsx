@@ -19,6 +19,7 @@ interface Booking {
 function BookingsContent() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
+  const [filterStatus, setFilterStatus] = useState<"all" | "confirmed" | "pending" | "cancelled">("all")
 
   useEffect(() => {
     // Load bookings from localStorage
@@ -59,6 +60,10 @@ function BookingsContent() {
   }, [])
 
   const mockBookings: Booking[] = []
+
+  const filteredBookings = filterStatus === "all" 
+    ? bookings 
+    : bookings.filter((booking) => booking.status === filterStatus)
 
   const handleCancelBooking = (bookingId: string) => {
     if (confirm("คุณแน่ใจว่าต้องการยกเลิกการจองนี้?")) {
@@ -137,16 +142,44 @@ function BookingsContent() {
 
         {/* Filters */}
         <div className="mb-6 flex gap-3 flex-wrap">
-          <button className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-all">
+          <button 
+            onClick={() => setFilterStatus("all")}
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              filterStatus === "all" 
+                ? "bg-red-600 text-white" 
+                : "bg-white text-gray-700 border border-gray-300 hover:border-gray-400"
+            }`}
+          >
             ทั้งหมด
           </button>
-          <button className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium hover:border-gray-400 transition-all">
+          <button 
+            onClick={() => setFilterStatus("pending")}
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              filterStatus === "pending" 
+                ? "bg-yellow-600 text-white" 
+                : "bg-white text-gray-700 border border-gray-300 hover:border-gray-400"
+            }`}
+          >
             กำลังรอ
           </button>
-          <button className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium hover:border-gray-400 transition-all">
+          <button 
+            onClick={() => setFilterStatus("confirmed")}
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              filterStatus === "confirmed" 
+                ? "bg-green-600 text-white" 
+                : "bg-white text-gray-700 border border-gray-300 hover:border-gray-400"
+            }`}
+          >
             ยืนยันแล้ว
           </button>
-          <button className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium hover:border-gray-400 transition-all">
+          <button 
+            onClick={() => setFilterStatus("cancelled")}
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              filterStatus === "cancelled" 
+                ? "bg-red-600 text-white" 
+                : "bg-white text-gray-700 border border-gray-300 hover:border-gray-400"
+            }`}
+          >
             ยกเลิกแล้ว
           </button>
         </div>
@@ -159,8 +192,12 @@ function BookingsContent() {
         ) : displayBookings.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
             <div className="text-5xl mb-4">📭</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">ยังไม่มีการจองใดๆ</h2>
-            <p className="text-gray-600 mb-6">เริ่มจองสนามของคุณเลย!</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              {filterStatus === "all" ? "ยังไม่มีการจองใดๆ" : "ไม่พบการจองที่มีสถานะนี้"}
+            </h2>
+            <p className="text-gray-600 mb-6">
+              {filterStatus === "all" ? "เริ่มจองสนามของคุณเลย!" : "ลองเปลี่ยนตัวกรองการค้นหา"}
+            </p>
             <Link href="/">
               <button className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition-all">
                 ไปยังหน้าหลัก
@@ -169,7 +206,7 @@ function BookingsContent() {
           </div>
         ) : (
           <div className="space-y-4">
-            {displayBookings.map((booking) => (
+            {filteredBookings.map((booking) => (
               <div
                 key={booking.id}
                 className={`bg-white rounded-lg shadow-md border-l-4 overflow-hidden hover:shadow-lg transition-all ${

@@ -24,6 +24,7 @@ export default function ReservationDetails({
   const [selectedSlots, setSelectedSlots] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
+  const [bookingDate, setBookingDate] = useState(new Date().toISOString().split("T")[0])
   
   // Get field data from mock data
   const field = mockFields.find((f) => f.id === params.id)
@@ -58,37 +59,47 @@ export default function ReservationDetails({
   useEffect(() => {
     const supabase = createClient()
     const slots = generateTimeSlots()
-    setTimeSlots(slots)
+    
+    // Load booked slots from localStorage
+    const bookedSlots = localStorage.getItem("bookedSlots")
+    const booked = bookedSlots ? JSON.parse(bookedSlots) : {}
+    const fieldKey = `field_${params.id}_${bookingDate}`
+    const bookedTimesForDate = booked[fieldKey] || []
+
+    // Mark booked slots
+    const updatedSlots = slots.map((slot) => {
+      const slotTimeRange = `${slot.startTime} - ${slot.endTime}`
+      return bookedTimesForDate.includes(slotTimeRange)
+        ? { ...slot, isBooked: true }
+        : slot
+    })
+
+    setTimeSlots(updatedSlots)
     setLoading(false)
     setMounted(true)
 
-    // Subscribe to real-time booking changes
-    const channel = supabase
-      .channel("bookings")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "bookings",
-        },
-        (payload: any) => {
-          // Update time slots when a booking is made
-          setTimeSlots((prevSlots) =>
-            prevSlots.map((slot) =>
-              payload.new?.time_slot === slot.id
-                ? { ...slot, isBooked: true, bookedBy: payload.new?.user_id }
-                : slot
-            )
-          )
-        }
-      )
-      .subscribe()
+    // Subscribe to real-time booking changes from localStorage
+    const handleStorageChange = () => {
+      const updatedBooked = localStorage.getItem("bookedSlots")
+      const updatedBookedData = updatedBooked ? JSON.parse(updatedBooked) : {}
+      const bookedTimesForDate = updatedBookedData[fieldKey] || []
+
+      const refreshedSlots = slots.map((slot) => {
+        const slotTimeRange = `${slot.startTime} - ${slot.endTime}`
+        return bookedTimesForDate.includes(slotTimeRange)
+          ? { ...slot, isBooked: true }
+          : slot
+      })
+
+      setTimeSlots(refreshedSlots)
+    }
+
+    window.addEventListener("storage", handleStorageChange)
 
     return () => {
-      supabase.removeChannel(channel)
+      window.removeEventListener("storage", handleStorageChange)
     }
-  }, [mounted])
+  }, [mounted, bookingDate, params.id])
 
   const toggleSlot = (slotId: string) => {
     if (timeSlots.find((s) => s.id === slotId)?.isBooked) return
@@ -307,8 +318,9 @@ export default function ReservationDetails({
                   </label>
                   <input
                     type="date"
+                    value={bookingDate}
+                    onChange={(e) => setBookingDate(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-600"
-                    defaultValue={new Date().toISOString().split("T")[0]}
                   />
                 </div>
 
