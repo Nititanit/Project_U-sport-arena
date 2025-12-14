@@ -147,7 +147,7 @@ export default async function Home() {
               <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer">
                 <div className="relative">
                   <img
-                    src="/assets/images/stadium2.jpg"
+                    src="/assets/images/stadium.jpg"
                     alt="Stadium 2"
                     className="w-full h-48 object-cover"
                   />
@@ -194,7 +194,7 @@ export default async function Home() {
               <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer">
                 <div className="relative">
                   <img
-                    src="/assets/images/stadium3.jpg"
+                    src="/assets/images/stadium1.jpg"
                     alt="Stadium 3"
                     className="w-full h-48 object-cover"
                   />
@@ -241,7 +241,7 @@ export default async function Home() {
               <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer">
                 <div className="relative">
                   <img
-                    src="/app/images/stadium1.jpg"
+                    src="/assets/images/stadium1.jpg"
                     alt="Stadium 4"
                     className="w-full h-48 object-cover"
                   />
@@ -288,7 +288,7 @@ export default async function Home() {
               <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer">
                 <div className="relative">
                   <img
-                    src="/assets/images/fitness1.jpg"
+                    src="/assets/images/fitness.png"
                     alt="Fitness U Sport"
                     className="w-full h-48 object-cover"
                   />
