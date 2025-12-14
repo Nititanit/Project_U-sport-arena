@@ -78,14 +78,14 @@ export default function FieldDetailPage({
             </div>
 
             {/* Book Now Button */}
-            <div className="pt-6 border-t border-gray-200">
+            <Link href={`/reservation/${params.id}`}>
               <Button
                 size="lg"
                 className="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white"
               >
                 Book Now
               </Button>
-            </div>
+            </Link>
           </div>
         </div>
       </div>

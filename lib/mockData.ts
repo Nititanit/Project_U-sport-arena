@@ -11,63 +11,53 @@ export interface FootballField {
 export const mockFields: FootballField[] = [
   {
     id: "1",
-    name: "Stadium Central",
+    name: "Stadium 1(VIP)",
     description:
       "Premium football field located in the heart of the city. Features professional-grade turf and excellent lighting for evening games.",
-    location: "Downtown District",
+    location: "Khlong 6, Pathum Thani",
     pricePerHour: 50,
-    size: "11v11 (Full Size)",
+    size: "7vx7",
     surface: "Artificial Turf",
   },
   {
     id: "2",
-    name: "Riverside Arena",
+    name: "Stadium 2(VIP)",
     description:
       "Beautiful field overlooking the river with natural grass surface. Perfect for competitive matches and training sessions.",
-    location: "Riverside Park",
+    location: "Khlong 6, Pathum Thani",
     pricePerHour: 45,
-    size: "11v11 (Full Size)",
-    surface: "Natural Grass",
+    size: "7vx7",
+    surface: "Artificial Turf",
   },
   {
     id: "3",
-    name: "Community Field North",
+    name: "Stadium 3",
     description:
       "Well-maintained community field ideal for casual games and local tournaments. Great facilities and parking available.",
-    location: "North Community Center",
+    location: "Khlong 6, Pathum Thani",
     pricePerHour: 35,
     size: "7v7",
     surface: "Artificial Turf",
   },
   {
     id: "4",
-    name: "Elite Sports Complex",
+    name: "Stadium 4",
     description:
       "State-of-the-art facility with multiple fields, changing rooms, and professional equipment. Used by local professional teams.",
-    location: "Sports District",
+    location: "Khlong 6, Pathum Thani",
     pricePerHour: 75,
     size: "11v11 (Full Size)",
     surface: "Hybrid Grass",
   },
   {
     id: "5",
-    name: "Park Field East",
+    name: "Fitness U Sport",
     description:
       "Family-friendly field in a scenic park setting. Perfect for weekend games and recreational play.",
-    location: "East Park",
+    location: "Khlong 6, Pathum Thani",
     pricePerHour: 30,
-    size: "5v5",
-    surface: "Artificial Turf",
-  },
-  {
-    id: "6",
-    name: "Championship Stadium",
-    description:
-      "Premier venue hosting major tournaments. Features spectator stands, floodlights, and professional-grade facilities.",
-    location: "Sports Complex",
-    pricePerHour: 100,
-    size: "11v11 (Full Size)",
-    surface: "Natural Grass",
+    size: "-",
+    surface: "Gym",
   },
 ]
 
