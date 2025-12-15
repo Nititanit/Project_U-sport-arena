@@ -83,55 +83,6 @@ function BookingsContent() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* Navbar */}
-      <nav className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-8">
-          {/* Logo */}
-          <div className="flex-shrink-0">
-            <Link href="/" className="text-2xl font-bold text-red-600">
-              U-Sport
-            </Link>
-          </div>
-
-          {/* Search Bar */}
-          <div className="flex-1 max-w-md">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Find sports, venues..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-600"
-              />
-              <svg
-                className="absolute right-3 top-2.5 w-5 h-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </div>
-          </div>
-
-          {/* Navigation Links */}
-          <div className="flex items-center gap-6 ml-auto">
-            <Link href="/" className="flex items-center gap-2 text-gray-700 hover:text-red-600 font-medium">
-              <span>🏠</span> Home
-            </Link>
-            <Link href="/bookings" className="flex items-center gap-2 text-red-600 font-bold">
-              <span>📅</span> My Bookings
-            </Link>
-            <Link href="/profile" className="flex items-center gap-2 text-gray-700 hover:text-red-600 font-medium">
-              <span>👤</span> Profile
-            </Link>
-          </div>
-        </div>
-      </nav>
-
       {/* Main Content */}
       <div className="container mx-auto px-4 py-12">
         {/* Header */}
