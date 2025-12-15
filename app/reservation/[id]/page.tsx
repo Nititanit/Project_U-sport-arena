@@ -60,10 +60,16 @@ export default function ReservationDetails({
     const supabase = createClient()
     const slots = generateTimeSlots()
     
+    // Normalize booking date format (YYYY-MM-DD)
+    let normalizedDate = bookingDate
+    if (bookingDate.includes("T")) {
+      normalizedDate = bookingDate.split("T")[0]
+    }
+    
     // Load booked slots from localStorage
     const bookedSlots = localStorage.getItem("bookedSlots")
     const booked = bookedSlots ? JSON.parse(bookedSlots) : {}
-    const fieldKey = `field_${params.id}_${bookingDate}`
+    const fieldKey = `field_${params.id}_${normalizedDate}`
     const bookedTimesForDate = booked[fieldKey] || []
 
     // Mark booked slots
@@ -96,8 +102,15 @@ export default function ReservationDetails({
 
     window.addEventListener("storage", handleStorageChange)
 
+    // Also listen for custom booking update events
+    const handleBookingUpdate = () => {
+      handleStorageChange()
+    }
+    window.addEventListener("bookingUpdated", handleBookingUpdate)
+
     return () => {
       window.removeEventListener("storage", handleStorageChange)
+      window.removeEventListener("bookingUpdated", handleBookingUpdate)
     }
   }, [mounted, bookingDate, params.id])
 

@@ -67,6 +67,38 @@ function BookingsContent() {
 
   const handleCancelBooking = (bookingId: string) => {
     if (confirm("คุณแน่ใจว่าต้องการยกเลิกการจองนี้?")) {
+      // Find the booking to get fieldId and date
+      const bookingToCancel = bookings.find((b) => b.id === bookingId)
+      
+      if (bookingToCancel) {
+        // Remove booked time slots from localStorage
+        const bookedSlots = localStorage.getItem("bookedSlots")
+        const booked = bookedSlots ? JSON.parse(bookedSlots) : {}
+        
+        // Normalize date format (YYYY-MM-DD)
+        let bookingDateStr = String(bookingToCancel.bookingDate)
+        // If it looks like "2025-12-15T00:00:00" or similar, extract just the date part
+        if (bookingDateStr.includes("T")) {
+          bookingDateStr = bookingDateStr.split("T")[0]
+        }
+        
+        const fieldKey = `field_${bookingToCancel.fieldId}_${bookingDateStr}`
+        
+        if (booked[fieldKey]) {
+          // Remove the cancelled time slots
+          booked[fieldKey] = booked[fieldKey].filter(
+            (slot: string) => !bookingToCancel.timeSlots.includes(slot)
+          )
+          
+          // If no slots left, delete the key
+          if (booked[fieldKey].length === 0) {
+            delete booked[fieldKey]
+          }
+        }
+        
+        localStorage.setItem("bookedSlots", JSON.stringify(booked))
+      }
+      
       // Remove booking from state
       const updatedBookings = bookings.filter((booking) => booking.id !== bookingId)
       setBookings(updatedBookings)
@@ -74,7 +106,13 @@ function BookingsContent() {
       // Update localStorage
       localStorage.setItem("userBookings", JSON.stringify(updatedBookings))
       
-      // Trigger custom event for real-time update
+      // Trigger storage event with detail to notify other components
+      const event = new StorageEvent("storage", {
+        key: "bookedSlots",
+        newValue: localStorage.getItem("bookedSlots"),
+        storageArea: localStorage,
+      })
+      window.dispatchEvent(event)
       window.dispatchEvent(new Event("bookingUpdated"))
     }
   }
