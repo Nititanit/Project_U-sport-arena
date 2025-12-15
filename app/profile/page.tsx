@@ -44,15 +44,36 @@ function ProfileContent() {
   const onSave = async () => {
     setError(null)
     setSuccess(null)
+    
+    // Validate inputs
+    if (!username.trim()) {
+      setError("Username is required")
+      return
+    }
+    if (!email.trim()) {
+      setError("Email is required")
+      return
+    }
+    
     // Require password before saving
     setRequirePassword(true)
   }
 
   const onConfirmSave = async () => {
+    if (!password.trim()) {
+      setError("Password is required")
+      return
+    }
+    
     setSaving(true)
     setError(null)
     try {
-      const { error: err } = await updateProfile({ username, email, phone_number: phone }, password)
+      const updates: any = { username, email }
+      if (phone) {
+        updates.phone_number = phone
+      }
+      
+      const { error: err } = await updateProfile(updates, password)
       if (err) {
         setError(String(err.message || err))
         setSaving(false)
@@ -61,10 +82,13 @@ function ProfileContent() {
 
       // Refresh profile from DB
       await refreshProfile()
-      setSuccess("Saved successfully")
-      setEditing(false)
-      setRequirePassword(false)
-      setPassword("")
+      setSuccess("Profile updated successfully!")
+      setTimeout(() => {
+        setSuccess(null)
+        setEditing(false)
+        setRequirePassword(false)
+        setPassword("")
+      }, 2000)
     } catch (e) {
       setError(String(e))
     } finally {
@@ -101,7 +125,12 @@ function ProfileContent() {
               <div>
                 <label className="text-sm font-medium text-gray-500">Username</label>
                 {editing ? (
-                  <input value={username} onChange={e => setUsername(e.target.value)} className="mt-1 w-full border px-3 py-2 rounded-md" />
+                  <input 
+                    value={username} 
+                    onChange={e => setUsername(e.target.value)} 
+                    className="mt-1 w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" 
+                    placeholder="Enter your username"
+                  />
                 ) : (
                   <div className="mt-1 text-lg text-gray-900">{profile?.username || "N/A"}</div>
                 )}
@@ -110,7 +139,13 @@ function ProfileContent() {
               <div>
                 <label className="text-sm font-medium text-gray-500">Email</label>
                 {editing ? (
-                  <input value={email} onChange={e => setEmail(e.target.value)} className="mt-1 w-full border px-3 py-2 rounded-md" />
+                  <input 
+                    type="email"
+                    value={email} 
+                    onChange={e => setEmail(e.target.value)} 
+                    className="mt-1 w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" 
+                    placeholder="Enter your email"
+                  />
                 ) : (
                   <div className="mt-1 text-lg text-gray-900">{profile?.email || user?.email || "N/A"}</div>
                 )}
@@ -119,7 +154,12 @@ function ProfileContent() {
               <div>
                 <label className="text-sm font-medium text-gray-500">Phone Number</label>
                 {editing ? (
-                  <input value={phone} onChange={e => setPhone(e.target.value)} className="mt-1 w-full border px-3 py-2 rounded-md" />
+                  <input 
+                    value={phone} 
+                    onChange={e => setPhone(e.target.value)} 
+                    className="mt-1 w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" 
+                    placeholder="Enter your phone number"
+                  />
                 ) : (
                   <div className="mt-1 text-lg text-gray-900">{profile?.phone_number || "N/A"}</div>
                 )}
@@ -133,23 +173,42 @@ function ProfileContent() {
               <div className="pt-4">
                 {!editing ? (
                   <div className="flex gap-2">
-                    <button onClick={onStartEdit} className="bg-primary text-white px-4 py-2 rounded-md">Edit</button>
+                    <button onClick={onStartEdit} className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md font-medium transition-colors">Edit Profile</button>
                   </div>
                 ) : (
                   <div className="flex gap-2 items-center">
-                    <button onClick={onSave} className="bg-primary text-white px-4 py-2 rounded-md">Save</button>
-                    <button onClick={onCancel} className="border px-4 py-2 rounded-md">Cancel</button>
+                    <button onClick={onSave} className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md font-medium transition-colors">Save Changes</button>
+                    <button onClick={onCancel} className="border border-gray-300 hover:bg-gray-50 px-6 py-2 rounded-md font-medium transition-colors">Cancel</button>
                   </div>
                 )}
               </div>
 
               {requirePassword && (
-                <div className="mt-4">
-                  <label className="text-sm font-medium text-gray-500">Please enter your password to confirm changes</label>
-                  <input type="password" value={password} onChange={e => setPassword(e.target.value)} className="mt-1 w-full border px-3 py-2 rounded-md" />
-                  <div className="flex gap-2 mt-3">
-                    <button onClick={onConfirmSave} disabled={saving} className="bg-destructive text-white px-4 py-2 rounded-md">{saving ? "Saving..." : "Confirm and Save"}</button>
-                    <button onClick={() => { setRequirePassword(false); setPassword("") }} className="border px-4 py-2 rounded-md">Cancel</button>
+                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Confirm with your password</label>
+                  <input 
+                    type="password" 
+                    value={password} 
+                    onChange={e => setPassword(e.target.value)} 
+                    className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" 
+                    placeholder="Enter your password"
+                    disabled={saving}
+                  />
+                  <div className="flex gap-2 mt-4">
+                    <button 
+                      onClick={onConfirmSave} 
+                      disabled={saving} 
+                      className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md font-medium transition-colors"
+                    >
+                      {saving ? "Saving..." : "Confirm & Save"}
+                    </button>
+                    <button 
+                      onClick={() => { setRequirePassword(false); setPassword("") }} 
+                      disabled={saving}
+                      className="border border-gray-300 hover:bg-gray-50 disabled:bg-gray-100 px-6 py-2 rounded-md font-medium transition-colors"
+                    >
+                      Cancel
+                    </button>
                   </div>
                 </div>
               )}
