@@ -57,7 +57,7 @@ export default function FieldDetailPage({
                   Price
                 </h3>
                 <p className="text-2xl font-bold text-red-600">
-                  ${field.pricePerHour}
+                  ฿{field.pricePerHour}
                   <span className="text-base font-normal text-gray-600">
                     /hour
                   </span>
