@@ -5,6 +5,9 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { mockFields } from "@/lib/mockData"
+import { PromotionInput } from "@/components/PromotionInput"
+import { calculateFinalPrice, getPromotionDisplayText } from "@/lib/promotions"
+import { Promotion } from "@/types/supabase"
 
 interface TimeSlot {
   id: string
@@ -25,6 +28,7 @@ export default function ReservationDetails({
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
   const [bookingDate, setBookingDate] = useState(new Date().toISOString().split("T")[0])
+  const [appliedPromotion, setAppliedPromotion] = useState<Promotion | null>(null)
   
   // Get field data from mock data
   const field = mockFields.find((f) => f.id === params.id)
@@ -135,13 +139,20 @@ export default function ReservationDetails({
       return slot ? `${slot.startTime} - ${slot.endTime}` : ""
     })
 
+    const basePrice = selectedSlots.length * (field?.pricePerHour || 0)
+    const finalPrice = calculateFinalPrice(basePrice, appliedPromotion)
+    const discountAmount = basePrice - finalPrice
+
     const tempBooking = {
       id: `BK${Date.now()}`,
       fieldId: params.id,
       fieldName: field?.name || "Unknown Field",
       bookingDate,
       timeSlots: timeSlotTexts,
-      totalPrice: selectedSlots.length * (field?.pricePerHour || 0),
+      totalPrice: basePrice,
+      finalPrice: finalPrice,
+      discountAmount: discountAmount,
+      appliedPromotion: appliedPromotion,
       status: "pending" as const,
       createdAt: new Date().toLocaleString("th-TH"),
     }
@@ -150,7 +161,7 @@ export default function ReservationDetails({
     sessionStorage.setItem("tempBooking", JSON.stringify(tempBooking))
 
     // Navigate to payment option page
-    router.push("/payment")
+    router.push("/reservation/payment-option")
   }
 
   if (!field) {
@@ -338,10 +349,37 @@ export default function ReservationDetails({
                     <span className="text-gray-700">จำนวนชั่วโมง:</span>
                     <span className="font-semibold text-gray-900">{selectedSlots.length}</span>
                   </div>
-                  <div className="flex justify-between items-center text-lg font-bold border-t pt-4">
-                    <span>รวมทั้งสิ้น:</span>
-                    <span className="text-red-600">{selectedSlots.length * field.pricePerHour} บาท</span>
-                  </div>
+
+                  {/* Promotion Input */}
+                  <PromotionInput 
+                    onApplyPromotion={setAppliedPromotion}
+                    appliedPromotion={appliedPromotion}
+                  />
+
+                  {/* Discount and Price Display */}
+                  {(() => {
+                    const basePrice = selectedSlots.length * field.pricePerHour
+                    const finalPrice = calculateFinalPrice(basePrice, appliedPromotion)
+                    const discountAmount = basePrice - finalPrice
+                    return (
+                      <>
+                        {appliedPromotion && discountAmount > 0 && (
+                          <div className="bg-red-50 border border-red-300 rounded-lg p-3 mb-4">
+                            <div className="flex justify-between items-center">
+                              <span className="text-red-700 font-semibold">ส่วนลด ({getPromotionDisplayText(appliedPromotion)}):</span>
+                              <span className="text-red-700 font-bold">-{discountAmount.toLocaleString()} บาท</span>
+                            </div>
+                          </div>
+                        )}
+                        <div className="flex justify-between items-center text-lg font-bold border-t pt-4">
+                          <span>รวมทั้งสิ้น:</span>
+                          <span className={`${appliedPromotion && discountAmount > 0 ? "text-green-600" : "text-red-600"}`}>
+                            {finalPrice.toLocaleString()} บาท
+                          </span>
+                        </div>
+                      </>
+                    )
+                  })()}
                 </div>
 
                 {/* Booking Button */}

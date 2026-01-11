@@ -11,8 +11,18 @@ A modern Next.js application for booking football fields, built with TypeScript,
 - 📋 View detailed field information
 - 🔐 Authentication ready (Supabase integration)
 - 🎨 Modern, clean UI with White and Red theme
+- 🎫 **Promotion System**: Coupon codes and discounts for bookings
 
-## Tech Stack
+## Quick Start
+
+### 🚀 Promotion System Setup
+See [QUICK_START.md](QUICK_START.md) for complete setup instructions including database migration.
+
+### Basic Setup
+```bash
+npm install
+npm run dev
+```
 
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript

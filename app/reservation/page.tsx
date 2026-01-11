@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
+import { PromotionInput } from "@/components/PromotionInput"
+import { calculateFinalPrice, getPromotionDisplayText } from "@/lib/promotions"
+import { Promotion } from "@/types/supabase"
 
 interface TimeSlot {
   id: string
@@ -17,8 +20,9 @@ export default function ReservationDetails() {
   const [selectedSlots, setSelectedSlots] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
+  const [appliedPromotion, setAppliedPromotion] = useState<Promotion | null>(null)
 
-  // Generate time slots from 13:00 to 00:00
+  const PRICE_PER_HOUR = 1000
   const generateTimeSlots = () => {
     const slots: TimeSlot[] = []
 
@@ -109,16 +113,22 @@ export default function ReservationDetails() {
           user_id: session.session.user.id,
           time_slot: slotId,
           booking_date: new Date().toISOString().split("T")[0],
+          promotion_id: appliedPromotion?.id || null,
         })
       }
 
       alert("จองสนามสำเร็จ!")
       setSelectedSlots([])
+      setAppliedPromotion(null)
     } catch (error) {
       console.error("Error booking:", error)
       alert("เกิดข้อผิดพลาดในการจอง")
     }
   }
+
+  const basePrice = selectedSlots.length * PRICE_PER_HOUR
+  const finalPrice = calculateFinalPrice(basePrice, appliedPromotion)
+  const discountAmount = basePrice - finalPrice
 
   if (!mounted || loading) {
     return <div className="flex items-center justify-center h-screen text-lg font-semibold">กำลังโหลด...</div>
@@ -285,15 +295,39 @@ export default function ReservationDetails() {
                 <div className="border-t pt-4 mb-6">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-gray-700">ราคาต่อชั่วโมง:</span>
-                    <span className="font-semibold text-gray-900">1,000 บาท</span>
+                    <span className="font-semibold text-gray-900">{PRICE_PER_HOUR.toLocaleString()} บาท</span>
                   </div>
                   <div className="flex justify-between items-center mb-4">
                     <span className="text-gray-700">จำนวนชั่วโมง:</span>
                     <span className="font-semibold text-gray-900">{selectedSlots.length}</span>
                   </div>
+                  <div className="flex justify-between items-center mb-2 font-semibold">
+                    <span>ราคารวม:</span>
+                    <span className="text-gray-900">{basePrice.toLocaleString()} บาท</span>
+                  </div>
+
+                  {/* Promotion Input */}
+                  <PromotionInput 
+                    onApplyPromotion={setAppliedPromotion}
+                    appliedPromotion={appliedPromotion}
+                  />
+
+                  {/* Discount Display */}
+                  {appliedPromotion && discountAmount > 0 && (
+                    <div className="bg-red-50 border border-red-300 rounded-lg p-3 mb-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-red-700 font-semibold">ส่วนลด ({getPromotionDisplayText(appliedPromotion)}):</span>
+                        <span className="text-red-700 font-bold">-{discountAmount.toLocaleString()} บาท</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Final Price */}
                   <div className="flex justify-between items-center text-lg font-bold border-t pt-4">
                     <span>รวมทั้งสิ้น:</span>
-                    <span className="text-red-600">{selectedSlots.length * 1000} บาท</span>
+                    <span className={`${appliedPromotion && discountAmount > 0 ? "text-green-600" : "text-red-600"}`}>
+                      {finalPrice.toLocaleString()} บาท
+                    </span>
                   </div>
                 </div>
 
