@@ -75,10 +75,10 @@ export default function Navbar() {
           {/* Navigation Links */}
           <div className="hidden md:flex items-center gap-6 flex-shrink-0">
             <Link href="/" className="text-gray-700 hover:text-red-600 font-medium hover:shadow-md hover:-translate-y-1 px-3 py-2 rounded-lg transition-all duration-200">
-              Home
+              หน้าหลัก
             </Link>
             <Link href="/bookings" className="text-gray-700 hover:text-red-600 font-medium hover:shadow-md hover:-translate-y-1 px-3 py-2 rounded-lg transition-all duration-200">
-              My Bookings
+              ประวัติการจอง
             </Link>
           </div>
 

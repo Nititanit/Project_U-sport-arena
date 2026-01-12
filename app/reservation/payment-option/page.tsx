@@ -1,11 +1,34 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
+
+interface TempBooking {
+  id: string
+  fieldId: string
+  fieldName: string
+  bookingDate: string
+  timeSlots: string[]
+  totalPrice: number
+  finalPrice?: number
+  discountAmount?: number
+  appliedPromotion?: any
+  status: "pending"
+  createdAt: string
+}
 
 export default function PaymentOption() {
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [tempBooking, setTempBooking] = useState<TempBooking | null>(null)
+
+  useEffect(() => {
+    // Load booking data from session storage
+    const booking = sessionStorage.getItem("tempBooking")
+    if (booking) {
+      setTempBooking(JSON.parse(booking))
+    }
+  }, [])
 
   const handlePaymentSelect = (method: string) => {
     setSelectedPayment(method)
@@ -89,6 +112,43 @@ export default function PaymentOption() {
             <h1 className="text-4xl font-bold text-gray-900 mb-3">เลือกวิธีชำระเงิน</h1>
             <p className="text-lg text-gray-600">เลือกวิธีการชำระเงินที่สะดวกสำหรับคุณ</p>
           </div>
+
+          {/* Booking Summary */}
+          {tempBooking && (
+            <div className="bg-white rounded-xl shadow-md p-6 mb-8 border-l-4 border-red-600">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">สรุปการจอง</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-700">สนาม:</span>
+                  <span className="font-semibold text-gray-900">{tempBooking.fieldName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">วันที่:</span>
+                  <span className="font-semibold text-gray-900">{tempBooking.bookingDate}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">เวลา:</span>
+                  <span className="font-semibold text-gray-900">{tempBooking.timeSlots.join(", ")}</span>
+                </div>
+                <div className="border-t pt-3 mt-3">
+                  <div className="flex justify-between mb-2">
+                    <span className="text-gray-700">ราคารวม:</span>
+                    <span className="font-semibold text-gray-900">{tempBooking.totalPrice.toLocaleString()} บาท</span>
+                  </div>
+                  {tempBooking.discountAmount && tempBooking.discountAmount > 0 && (
+                    <div className="flex justify-between mb-2 text-red-600">
+                      <span>ส่วนลด ({tempBooking.appliedPromotion?.name}):</span>
+                      <span className="font-semibold">-{tempBooking.discountAmount.toLocaleString()} บาท</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-lg font-bold text-green-600 bg-green-50 p-2 rounded">
+                    <span>รวมทั้งสิ้น:</span>
+                    <span>{(tempBooking.finalPrice || tempBooking.totalPrice).toLocaleString()} บาท</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Payment Methods */}
           <div className="space-y-4 mb-8">
